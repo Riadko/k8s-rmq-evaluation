@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: counter-deployment
+  namespace: riadkolli
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: counter
+  template:
+    metadata:
+      labels:
+        app: counter
+    spec:
+      containers:
+        - name: counter
+          image: riko99/counter:latest
+          env:
+            - name: RABBITMQ_URL
+              value: "amqp://production-rabbitmqcluster:5672"
+            - name: INTERVAL
+              value: "10"
+          ports:
+            - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: counter-service
+  namespace: riadkolli
+spec:
+  selector:
+    app: counter
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer
